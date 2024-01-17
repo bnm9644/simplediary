@@ -2,8 +2,8 @@ import React, { useRef, useState } from "react";
 
 const DiaryEditor = ({onCreate}) => {
 
-    const authorInput = useRef(); //★ HTML 요소 접근! - ref 속성으로 이용!!
-    const contentInput = useRef();
+    const authorInput = useRef();  //★ HTML 요소 접근! - HTML 태그에 ref 속성으로 이용!! (DOM 접근) - HTML 태그에 ref 속성으로 ref = {authorInput} 으로 연결
+    const contentInput = useRef(); //★ HTML 요소 접근! - HTML 태그에 ref 속성으로 ref = {contentInput} 으로 연결
 
     const [state, setState] = useState({
         author : "",
@@ -21,12 +21,12 @@ const DiaryEditor = ({onCreate}) => {
 
     const handleSubmit = () => {
         if (state.author.length < 1) {                    
-            authorInput.current.focus(); // input 태그의 ref 속성으로 잡은 author의 input 태그가 focus이벤트 처리
+            authorInput.current.focus();    // input 태그의 ref 속성으로 잡은 author의 input 태그가 focus이벤트 처리
             return; //중단
         }
 
         if (state.content.length < 5) {
-            contentInput.current.focus();        
+            contentInput.current.focus();   // ref를 부여한 HTML요소에 .current로 접근!
             return;
         }
         
@@ -44,7 +44,7 @@ const DiaryEditor = ({onCreate}) => {
             <h2>오늘의 일기</h2>
             <div>
                 <input 
-                ref = {authorInput}
+                ref = {authorInput} 
                 name = "author"
                 value = {state.author} 
                 onChange={handleChangeState}
