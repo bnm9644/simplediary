@@ -1,9 +1,8 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './App.css';
 import DiaryEditor from './DiaryEditor';
 import DiaryList from './DiaryList';
-import Lifecycle from './Lifecycle';
-import Lifecycle2 from './Lifecycle2';
+//https://jsonplaceholder.typicode.com/comments
 
 /* 배열 만듬
 const dummyList =  [
@@ -36,6 +35,32 @@ function App() {
   const [data, setData] = useState([]); // 일기 데이터,  시작은 빈 배열로, 저장시 상태 변화 (setData)
 
   const dataId = useRef(0);
+
+  // API 쏘는 방법 - fetch! , async 선언 - promise 반환, 비동기 함수 
+  const getData = async() => {
+    const res = await fetch("https://jsonplaceholder.typicode.com/comments"). then((res) => res.json());
+    console.log(res);
+
+    // 해당 함수는 res 배열 api 정보 가져와, 0~20번째만 추려내고
+    // 그걸 map으로 it로 둬 프로퍼티를 하나씩 가져옴
+    const initData = res.slice(0,20).map((it) => {
+      return {
+        author : it.email,
+        content : it.body,
+        emotion : Math.floor(Math.random()*5)+1,
+        create_date : new Date().getTime(),
+        id : dataId.current++
+      }
+    });
+
+    setData(initData);
+  };
+
+  // mount 되자마자 호출
+  useEffect(()=> {
+    getData();
+  }, []);
+
 
   // 새로운 일기 생성
   const onCreate = (author,content,emotion) => {
@@ -71,8 +96,6 @@ function App() {
 
   return (
     <div className = "App">    
-      <Lifecycle />
-      <Lifecycle2 />
       <DiaryEditor onCreate = {onCreate}/>
       <DiaryList onEdit = {onEdit} onRemove = {onRemove} diaryList = {data} /> 
     </div>
@@ -91,12 +114,6 @@ function App() {
    탄생 - 화면에 나타나는 것 (Mount)
    변화 - 업데이트 (Re- Render) (Update)
    죽음 - 화면에서 사라짐 (UnMount)
-
-   React Hooks (함수형 컨퍼넌트)
-   useState - 
-   useEffect  - 
-   useRef 
-
  */    
 
 export default App;
