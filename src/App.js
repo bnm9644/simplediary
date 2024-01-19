@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
 import DiaryEditor from './DiaryEditor';
 import DiaryList from './DiaryList';
+import OptimizeTest from './OptimizeTest';
 //https://jsonplaceholder.typicode.com/comments
 
 /* 배열 만듬
@@ -30,6 +31,7 @@ const dummyList =  [
   
 ];
 */
+
 function App() {  
   
   const [data, setData] = useState([]); // 일기 데이터,  시작은 빈 배열로, 저장시 상태 변화 (setData)
@@ -39,7 +41,7 @@ function App() {
   // API 쏘는 방법 - fetch! , async 선언 - promise 반환, 비동기 함수 
   const getData = async() => {
     const res = await fetch("https://jsonplaceholder.typicode.com/comments"). then((res) => res.json());
-    console.log(res);
+    //console.log(res);
 
     // 해당 함수는 res 배열 api 정보 가져와, 0~20번째만 추려내고
     // 그걸 map으로 it로 둬 프로퍼티를 하나씩 가져옴
@@ -80,7 +82,7 @@ function App() {
   
   // 데이터 삭제 - 일기 삭제
   const onRemove = (targetId) => {
-    console.log(`${targetId}가 삭제되었습니다.`);
+    // console.log(`${targetId}가 삭제되었습니다.`);
     const newDiaryList = data.filter((it) => it.id !== targetId); 
     // targetId 가 포함되지 않은 배열로만,setData -> diaryList 한번더 바뀌며 리렌더
     setData (newDiaryList);
@@ -94,9 +96,31 @@ function App() {
     ) 
   }
 
+  /* 
+    메모이제이션 : 이미 계산 해본 연산 기억해 뒀다가, 
+                  동일한 계산 시 기억 해뒀던 데이터를 반환!
+                  useMemo (cb,[]);
+  */
+
+  const getDiaryAnalysis = useMemo(
+    () => {
+    const goodCount = data.filter((it) => it.emotion >=3).length;
+    const badCount = data.length -goodCount;
+    const goodRatio = (goodCount / data.length) * 100;
+    return {goodCount,goodRatio,badCount}; 
+  }, [data.length] // 데이터 길이가 안 변하면 계산 안하고 반환
+  );
+
+  // ★ cb 함수가 리턴하는 값을 그대로 리턴, 값을 리턴하는것이므로 값으로 사용
+  const {goodCount,goodRatio,badCount} = getDiaryAnalysis;
+
   return (
     <div className = "App">    
       <DiaryEditor onCreate = {onCreate}/>
+      <div>전체 일기 : {data.length} </div>
+      <div>기분 좋은 일기 : {goodCount} </div>
+      <div>기분 나쁜 일기 : {badCount} </div>
+      <div>기분 좋은 일기 비율 : {goodRatio} % </div>
       <DiaryList onEdit = {onEdit} onRemove = {onRemove} diaryList = {data} /> 
     </div>
     );  

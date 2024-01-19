@@ -1,5 +1,6 @@
 import DiaryItem from "./DiaryItem.js";
 
+// 일기 리스트
 const DiaryList = ({onEdit,onRemove,diaryList}) => {
 
     return (
@@ -15,7 +16,7 @@ const DiaryList = ({onEdit,onRemove,diaryList}) => {
     );
 };
 
-//DiaryList - 
+//DiaryList - 기본 속성 , 이게 없으면 diaryList에 값 없을때 렌더링 시 Error!
 DiaryList.defaultProps = {
     diaryList: [],
 }
