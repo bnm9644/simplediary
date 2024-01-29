@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useReducer, useRef } from 'react';
 import './App.css';
 import DiaryEditor from './DiaryEditor';
 import DiaryList from './DiaryList';
-import OptimizeTest from './OptimizeTest';
+//import OptimizeTest from './OptimizeTest';
 //https://jsonplaceholder.typicode.com/comments
 
 /* 배열 만듬
@@ -32,16 +32,41 @@ const dummyList =  [
 ];
 */
 
+const reducer = (state , action) => {
+  switch(action.type) {
+    case 'INIT' :               // initData
+    {return action.data}        // 새로운 state(상태)
+
+    case 'CREATE' :             // onCreate
+    { const create_date = new Date().getTime(); 
+      const  newItem = {
+        ...action.data,
+        create_date
+      }
+      return [newItem , ...state];
+    }
+    case 'REMOVE' :             // onRemove
+    
+    case 'EDIT'   :             // onEdit
+    
+    default :
+
+    return state; // return 값이 새로운 상태 값!
+  }
+}
+
 function App() {  
   
-  const [data, setData] = useState([]); // 일기 데이터,  시작은 빈 배열로, 저장시 상태 변화 (setData)
+  // const [data, setData] = useState([]); // 일기 데이터,  시작은 빈 배열로, 저장시 상태 변화 (setData)
+
+  // useReducer (state, []) - 상태변화 처리 함수와, data 초기값 전달! , 복잡한 상태 변화를 밖으로 뺴내는게 목적!
+  const [data, dispatch] = useReducer(reducer , []); // dispatch  호출 -> reducer 실행 -> reducer 가 리턴하는 값이 data의 값!
 
   const dataId = useRef(0);
 
   // API 쏘는 방법 - fetch! , async 선언 - promise 반환, 비동기 함수 
   const getData = async() => {
-    const res = await fetch("https://jsonplaceholder.typicode.com/comments"). then((res) => res.json());
-    //console.log(res);
+    const res = await fetch("https://jsonplaceholder.typicode.com/comments").then((res) => res.json());    
 
     // 해당 함수는 res 배열 api 정보 가져와, 0~20번째만 추려내고
     // 그걸 map으로 it로 둬 프로퍼티를 하나씩 가져옴
@@ -55,7 +80,8 @@ function App() {
       }
     });
 
-    setData(initData);
+    dispatch({type:"INIT" ,data : initData}) // Reducer 함수는 action 객체 받는다. action 타입은 INIT이고, 액션에 필요한 data는 initData다!
+    //setData(initData);
   };
 
   // mount 되자마자 호출
@@ -66,26 +92,31 @@ function App() {
 
   // 새로운 일기 생성
   const onCreate = (author,content,emotion) => {
-    const create_date = new Date().getTime();
+    
+    dispatch({type:'CREATE', data:{author, content,emotion,id:dataId.current}})
 
-    const newItem = {
-      author,
-      content,
-      emotion,
-      create_date,
-      id : dataId.current
-    };
+    // const create_date = new Date().getTime();
+    // const newItem = {
+    //   author,
+    //   content,
+    //   emotion,
+    //   create_date,
+    //   id : dataId.current
+    // };
 
     dataId.current += 1;
-    setData([newItem, ...data]); //새로운 데이터가 제일 위에 올라와야 함
+    // setData([newItem, ...data]); //새로운 데이터가 제일 위에 올라와야 함
   } 
   
   // 데이터 삭제 - 일기 삭제
   const onRemove = (targetId) => {
+
+    dispatch({type:"REMOVE", targetId})
+
     // console.log(`${targetId}가 삭제되었습니다.`);
-    const newDiaryList = data.filter((it) => it.id !== targetId); 
+    // const newDiaryList = data.filter((it) => it.id !== targetId); 
     // targetId 가 포함되지 않은 배열로만,setData -> diaryList 한번더 바뀌며 리렌더
-    setData (newDiaryList);
+    // setData (newDiaryList);
   }; 
 
   // 리스트 내 content 수정하기, 어떤 걸 받아와야 하여, 뭘 수정하는지 알아야 함
